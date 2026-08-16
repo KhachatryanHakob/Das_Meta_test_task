@@ -1,8 +1,31 @@
+resource "kubernetes_namespace_v1" "monitoring" {
+  metadata {
+    name = "monitoring"
+  }
+
+  depends_on = [
+    module.eks
+  ]
+}
+
+resource "kubernetes_secret_v1" "grafana_slack_webhook" {
+  metadata {
+    name      = "grafana-slack-webhook"
+    namespace = kubernetes_namespace_v1.monitoring.metadata[0].name
+  }
+
+  data = {
+    SLACK_WEBHOOK_URL = var.grafana_slack_webhook_url
+  }
+
+  type = "Opaque"
+}
+
 resource "helm_release" "kube_prometheus_stack" {
   name      = "kube-prometheus-stack"
-  namespace = "monitoring"
+  namespace = kubernetes_namespace_v1.monitoring.metadata[0].name
 
-  create_namespace = true
+  create_namespace = false
 
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
@@ -16,7 +39,7 @@ resource "helm_release" "kube_prometheus_stack" {
   timeout = 900
 
   depends_on = [
-    module.eks
+    kubernetes_secret_v1.grafana_slack_webhook
   ]
 }
 

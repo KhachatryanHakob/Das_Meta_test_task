@@ -32,6 +32,8 @@ resource "helm_release" "aws_load_balancer_controller" {
       region      = var.aws_region
       vpcId       = module.vpc.vpc_id
 
+      enableServiceMutatorWebhook = false
+
       serviceAccount = {
         create = true
         name   = "aws-load-balancer-controller"
@@ -43,7 +45,11 @@ resource "helm_release" "aws_load_balancer_controller" {
     })
   ]
 
+  wait    = true
+  timeout = 600
+
   depends_on = [
+    module.eks,
     module.load_balancer_controller_irsa
   ]
 }

@@ -39,3 +39,9 @@ variable "desired_nodes" {
   type        = number
   default     = 2
 }
+
+variable "grafana_slack_webhook_url" {
+  description = "Slack webhook URL used by Grafana alerting."
+  type        = string
+  sensitive   = true
+}

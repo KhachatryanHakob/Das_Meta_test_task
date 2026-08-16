@@ -1,10 +1,18 @@
+resource "time_sleep" "wait_for_application_alb" {
+  depends_on = [
+    helm_release.application
+  ]
+
+  create_duration = "120s"
+}
+
 data "aws_lb" "application" {
   tags = {
     "ingress.k8s.aws/stack" = "demo/demo-app"
   }
 
   depends_on = [
-    helm_release.application
+    time_sleep.wait_for_application_alb
   ]
 }
 
