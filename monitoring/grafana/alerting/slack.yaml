@@ -1,0 +1,27 @@
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: demo-app-slack
+
+    receivers:
+      - uid: demo_app_slack
+        type: slack
+        disableResolveMessage: false
+
+        settings:
+          url: $SLACK_WEBHOOK_URL
+          title: 'Demo App Alert'
+          text: '{{ template "slack.default.text" . }}'
+
+policies:
+  - orgId: 1
+    receiver: demo-app-slack
+
+    group_by:
+      - alertname
+      - application
+
+    group_wait: 10s
+    group_interval: 1m
+    repeat_interval: 4h

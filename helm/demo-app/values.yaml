@@ -1,0 +1,30 @@
+replicaCount: 2
+
+image:
+  repository: nginx
+  tag: "1.29-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 250m
+    memory: 128Mi
+
+ingress:
+  enabled: true
+  className: alb
+  path: /
+  pathType: Prefix
+
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/success-codes: "200-399"

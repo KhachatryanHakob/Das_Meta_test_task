@@ -1,0 +1,202 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: demo-app-resource-alerts
+    folder: Demo Application Alerts
+    interval: 1m
+
+    rules:
+      - uid: demo_app_high_cpu
+        title: Demo App - High CPU
+        condition: C
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: >-
+                sum by (pod) (
+                  rate(container_cpu_usage_seconds_total{
+                    namespace="demo",
+                    pod=~"demo-app-.*",
+                    container!="",
+                    container!="POD"
+                  }[5m])
+                )
+              instant: true
+              intervalMs: 15000
+              maxDataPoints: 43200
+              range: false
+              refId: A
+
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: []
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - B
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: last
+              refId: B
+              type: reduce
+
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.2
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+
+        annotations:
+          summary: Demo application CPU usage is high
+          description: A demo-app pod has been using more than 80% of its configured CPU limit for 2 minutes.
+
+        labels:
+          severity: warning
+          application: demo-app
+          resource: cpu
+
+        isPaused: false
+
+      - uid: demo_app_high_memory
+        title: Demo App - High Memory
+        condition: C
+
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: >-
+                sum by (pod) (
+                  container_memory_working_set_bytes{
+                    namespace="demo",
+                    pod=~"demo-app-.*",
+                    container!="",
+                    container!="POD"
+                  }
+                )
+              instant: true
+              intervalMs: 15000
+              maxDataPoints: 43200
+              range: false
+              refId: A
+
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params: []
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - B
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: A
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: last
+              refId: B
+              type: reduce
+
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 107374182
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: B
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+
+        annotations:
+          summary: Demo application memory usage is high
+          description: A demo-app pod has been using more than 80% of its configured memory limit for 2 minutes.
+
+        labels:
+          severity: warning
+          application: demo-app
+          resource: memory
+
+        isPaused: false

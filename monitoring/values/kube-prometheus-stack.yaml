@@ -1,0 +1,65 @@
+alertmanager:
+  enabled: false
+
+grafana:
+  enabled: true
+
+  envFromSecret: grafana-slack-webhook
+
+  defaultDashboardsEnabled: true
+
+  service:
+    type: ClusterIP
+
+  persistence:
+    enabled: false
+
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+
+    alerts:
+      enabled: true
+      label: grafana_alert
+      labelValue: "1"
+      resource: configmap
+
+  additionalDataSources:
+    - name: Loki
+      uid: loki
+      type: loki
+      access: proxy
+      url: http://loki-gateway.monitoring.svc.cluster.local
+      isDefault: false
+      editable: false
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+      
+prometheus:
+  prometheusSpec:
+    retention: 2d
+
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+kubeEtcd:
+  enabled: false
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false

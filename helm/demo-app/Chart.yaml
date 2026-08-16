@@ -1,0 +1,7 @@
+apiVersion: v2
+name: demo-app
+description: Simple nginx application for the DevOps test task
+type: application
+
+version: 0.1.0
+appVersion: "1.29"
